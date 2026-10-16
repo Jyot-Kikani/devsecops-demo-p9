@@ -1,13 +1,11 @@
-"""
-Intentionally vulnerable demo app for a DevSecOps CI/CD talk.
-DO NOT deploy this anywhere real. It exists to be caught by scanners.
-"""
-from flask import Flask, request
-import sqlite3
+"""Fixed version for the local P9 DevSecOps demonstration."""
 import os
+import sqlite3
+
+from flask import Flask, request
 
 app = Flask(__name__)
-DB_PATH = os.path.join(os.path.dirname(__file__), "demo.db")
+DB_PATH = os.environ.get("DB_PATH", "/tmp/p9-demo.db")
 
 
 def get_db():
@@ -23,16 +21,17 @@ def home():
     return "DevSecOps demo app is running. Try /user?name=admin"
 
 
-# --- INTENTIONAL VULNERABILITY: SQL Injection (CWE-89) ---
-# Semgrep should flag this during the SAST step of the pipeline.
 @app.route("/user")
 def get_user():
     name = request.args.get("name", "")
     conn = get_db()
-    query = "SELECT id, username, role FROM users WHERE username = '" + name + "'"  # nosec - intentional for demo
-    cursor = conn.execute(query)
-    rows = cursor.fetchall()
-    return {"results": rows}
+    try:
+        rows = conn.execute(
+            "SELECT id, username, role FROM users WHERE username = ?", (name,)
+        ).fetchall()
+        return {"results": rows}
+    finally:
+        conn.close()
 
 
 @app.route("/health")
