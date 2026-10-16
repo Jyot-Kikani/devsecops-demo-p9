@@ -4,7 +4,7 @@ metadata:
   name: demo-app
   namespace: p9-demo
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: demo-app
