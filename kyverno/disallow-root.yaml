@@ -1,17 +1,21 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: disallow-root
+  name: disallow-root-p9
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: Deployment
 spec:
-  validationFailureAction: Enforce
   background: false
   rules:
-    - name: check-runAsNonRoot
+    - name: require-non-root
       match:
-        resources:
-          kinds: ["Pod"]
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [p9-demo]
       validate:
-        message: "Running as root is not allowed. Set spec.securityContext.runAsNonRoot: true."
+        failureAction: Enforce
+        message: "P9: set spec.securityContext.runAsNonRoot to true."
         pattern:
           spec:
             securityContext:

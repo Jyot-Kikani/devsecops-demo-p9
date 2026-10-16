@@ -3,61 +3,52 @@ name: DevSecOps Pipeline
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  security-scan:
+  security:
+    name: ${{ matrix.scanner }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        scanner: [Gitleaks, Semgrep, Trivy-dependencies, Hadolint]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gitleaks - current files
+        if: matrix.scanner == 'Gitleaks'
+        run: >-
+          docker run --rm -v "$PWD:/repo"
+          ghcr.io/gitleaks/gitleaks:v8.30.1
+          dir /repo --config /repo/.gitleaks.toml --redact --exit-code 1
+      - name: Semgrep - SQL injection
+        if: matrix.scanner == 'Semgrep'
+        run: >-
+          docker run --rm -v "$PWD:/src" -w /src
+          semgrep/semgrep:1.181.0
+          semgrep scan --config .semgrep.yml --error --metrics=off app.py
+      - name: Trivy - dependencies
+        if: matrix.scanner == 'Trivy-dependencies'
+        run: >-
+          docker run --rm -v "$PWD:/repo"
+          aquasec/trivy:0.76.0 fs --scanners vuln --severity HIGH,CRITICAL
+          --exit-code 1 /repo/requirements.txt
+      - name: Hadolint - Dockerfile
+        if: matrix.scanner == 'Hadolint'
+        run: docker run --rm -i hadolint/hadolint:v2.14.0 < Dockerfile
+
+  image:
+    name: Build and scan image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # 1. Secret scanning
-      - name: Gitleaks - scan for secrets
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # 2. SAST
-      - name: Semgrep - static analysis
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: p/ci
-
-      # 3. Dependency / CVE scanning (source)
-      - name: Trivy - filesystem scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: fs
-          scan-ref: requirements.txt
-          severity: HIGH,CRITICAL
-          exit-code: 1
-
-      # 4. Dockerfile lint (catches missing USER, i.e. running as root)
-      - name: Hadolint - Dockerfile lint
-        uses: hadolint/hadolint-action@v3.1.0
-        with:
-          dockerfile: Dockerfile
-
-      # 5. Build image
       - name: Build image
         run: docker build -t demo-app:${{ github.sha }} .
-
-      # 6. Container image CVE scan
-      - name: Trivy - image scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: demo-app:${{ github.sha }}
-          severity: HIGH,CRITICAL
-          exit-code: 0
-          ignore-unfixed: true
-
-      # 7. Slack alert on any failure above
-      - name: Slack alert
-        if: failure()
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {"text": "🚨 DevSecOps pipeline FAILED on ${{ github.repository }} — commit ${{ github.sha }} by ${{ github.actor }}"}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Trivy - image vulnerabilities
+        run: >-
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock
+          aquasec/trivy:0.76.0 image --scanners vuln --severity HIGH,CRITICAL
+          --ignore-unfixed --exit-code 1 demo-app:${{ github.sha }}

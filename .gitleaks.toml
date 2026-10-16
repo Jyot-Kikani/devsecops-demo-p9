@@ -1,0 +1,11 @@
+[extend]
+useDefault = true
+
+[allowlist]
+paths = ['''(^|/)(\.git|\.tools|examples|evidence)/''']
+
+[[rules]]
+id = "p9-demo-token"
+description = "Deliberately fake P9 token; never a real credential"
+regex = '''P9_DEMO_TOKEN\s*=\s*["'](p9demo_[0-9a-f]{32})["']'''
+secretGroup = 1

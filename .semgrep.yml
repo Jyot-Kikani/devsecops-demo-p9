@@ -1,0 +1,12 @@
+rules:
+  - id: p9-sql-injection
+    message: User input reaches SQL text. Use a parameterized query.
+    languages: [python]
+    severity: ERROR
+    mode: taint
+    pattern-sources:
+      - pattern: request.args.get(...)
+    pattern-sinks:
+      - patterns:
+          - pattern: $CONN.execute($SQL, ...)
+          - focus-metavariable: $SQL

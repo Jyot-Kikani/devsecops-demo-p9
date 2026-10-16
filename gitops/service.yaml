@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-app
+  namespace: p9-demo
+spec:
+  selector:
+    app: demo-app
+  ports:
+    - port: 5000
+      targetPort: 5000

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: p9-demo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Jyot-Kikani/devsecops-demo-p9.git
+    targetRevision: main
+    path: gitops
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: p9-demo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

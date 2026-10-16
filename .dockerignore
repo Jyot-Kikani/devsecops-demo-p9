@@ -1,0 +1,13 @@
+.git
+.github
+.tools
+evidence
+examples
+scripts
+k8s
+gitops
+kyverno
+__pycache__
+*.md
+*.db
+config.py
