@@ -2,6 +2,7 @@ name: DevSecOps Pipeline
 
 on:
   push:
+    branches: ["**"]
   pull_request:
   workflow_dispatch:
 
@@ -34,7 +35,7 @@ jobs:
         if: matrix.scanner == 'Trivy-dependencies'
         run: >-
           docker run --rm -v "$PWD:/repo"
-          aquasec/trivy:0.76.0 fs --scanners vuln --severity HIGH,CRITICAL
+          aquasec/trivy:0.76.0 fs --scanners vuln --severity MEDIUM,HIGH,CRITICAL
           --exit-code 1 /repo/requirements.txt
       - name: Hadolint - Dockerfile
         if: matrix.scanner == 'Hadolint'

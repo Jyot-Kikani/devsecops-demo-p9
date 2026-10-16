@@ -124,4 +124,4 @@ Capture: vulnerable pipeline findings, fake-secret detection, fixed pipeline suc
 
 ## Changes from the supplied demo
 
-Slack was removed. Missing fixed manifests were supplied, the identical vulnerable/fixed dependency lists were corrected, SQL injection is actually fixed, the fixed container can write its SQLite database, and Argo CD reads a separate directory so it does not apply duplicate broken/fixed Deployments. Image scanning fails on fixable HIGH/CRITICAL vulnerabilities rather than silently passing.
+Slack was removed. Missing fixed manifests were supplied, the identical vulnerable/fixed dependency lists were corrected, SQL injection is actually fixed, the fixed container can write its SQLite database, and Argo CD reads a separate directory so it does not apply duplicate broken/fixed Deployments. Dependency scanning includes MEDIUM findings because the supplied dependency versions do not trigger the original HIGH/CRITICAL filter. Image scanning fails on fixable HIGH/CRITICAL vulnerabilities rather than silently passing. The fixed image removes pip and its bundled components after installation because they are unnecessary at runtime.

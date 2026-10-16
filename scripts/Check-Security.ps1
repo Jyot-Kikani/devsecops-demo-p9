@@ -16,7 +16,7 @@ try {
                 docker run --rm -v ($repo + ':/src') -w /src semgrep/semgrep:1.181.0 semgrep scan --config .semgrep.yml --error --metrics=off app.py
             }
             Dependencies {
-                docker run --rm -v ($repo + ':/repo') -v p9-trivy-cache:/root/.cache/trivy aquasec/trivy:0.76.0 fs --scanners vuln --severity HIGH,CRITICAL --exit-code 1 /repo/requirements.txt
+                docker run --rm -v ($repo + ':/repo') -v p9-trivy-cache:/root/.cache/trivy aquasec/trivy:0.76.0 fs --scanners vuln --severity MEDIUM,HIGH,CRITICAL --exit-code 1 /repo/requirements.txt
             }
             Hadolint {
                 Get-Content -Raw Dockerfile | docker run --rm -i hadolint/hadolint:v2.14.0
