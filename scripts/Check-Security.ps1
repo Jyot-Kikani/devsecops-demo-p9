@@ -22,9 +22,9 @@ try {
                 Get-Content -Raw Dockerfile | docker run --rm -i hadolint/hadolint:v2.14.0
             }
             Image {
-                docker build -t p9-demo:fixed .
+                docker build -t p9-demo:scan .
                 if ($LASTEXITCODE -eq 0) {
-                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v p9-trivy-cache:/root/.cache/trivy aquasec/trivy:0.76.0 image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 p9-demo:fixed
+                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v p9-trivy-cache:/root/.cache/trivy aquasec/trivy:0.76.0 image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 p9-demo:scan
                 }
             }
         }

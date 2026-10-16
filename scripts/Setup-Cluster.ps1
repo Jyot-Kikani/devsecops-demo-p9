@@ -28,7 +28,8 @@ kubectl --kubeconfig $kubeconfig apply --server-side -n argocd -f https://raw.gi
 Confirm-NativeResult
 & $helm repo add kyverno https://kyverno.github.io/kyverno/ --repository-config (Join-Path $repo '.tools\helm-repositories.yaml') --repository-cache (Join-Path $repo '.tools\helm-cache')
 Confirm-NativeResult
-& $helm upgrade --install kyverno kyverno/kyverno --version 3.9.1 -n kyverno --create-namespace --kubeconfig $kubeconfig --repository-config (Join-Path $repo '.tools\helm-repositories.yaml') --repository-cache (Join-Path $repo '.tools\helm-cache') --wait --timeout 10m
+# This fresh lab has no legacy resources to migrate. Avoid the extra migration-job image.
+& $helm upgrade --install kyverno kyverno/kyverno --version 3.9.1 -n kyverno --create-namespace --kubeconfig $kubeconfig --repository-config (Join-Path $repo '.tools\helm-repositories.yaml') --repository-cache (Join-Path $repo '.tools\helm-cache') --set crds.migration.enabled=false --wait --timeout 10m
 Confirm-NativeResult
 kubectl --kubeconfig $kubeconfig apply -f (Join-Path $repo 'kyverno\disallow-root.yaml')
 Confirm-NativeResult

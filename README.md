@@ -78,7 +78,7 @@ Argo CD can take a few minutes to become ready. It should show `p9-demo` as Sync
 
 ## 5. Show GitOps synchronization
 
-In `gitops/deployment.yaml`, change `replicas: 2` to `replicas: 3`, commit, and push. Observe Argo CD applying the change, then check:
+In `gitops/deployment.yaml`, change the replica count (for example, from the current 3 to 2), commit, and push. Observe Argo CD applying the change, then check:
 
 ```powershell
 kubectl --kubeconfig .tools\kubeconfig get deployment demo-app -n p9-demo
