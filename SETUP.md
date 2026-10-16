@@ -17,3 +17,21 @@ Setup installs Argo CD v3.5.5 and Kyverno Helm chart 3.9.1 into the isolated `de
 The GitHub repository is [Jyot-Kikani/devsecops-demo-p9](https://github.com/Jyot-Kikani/devsecops-demo-p9). No Actions secrets or Slack account are required. If using another repository, update `argocd/application.yaml` and the documentation links.
 
 Follow [README.md](README.md) for the demonstration and expected results. Do not push to the original `upstream` remote.
+
+## Image download failures
+
+If the node reports TLS timeouts or ImagePullBackOff, download the same official images through Docker Desktop and import a single-platform archive:
+
+```powershell
+docker pull quay.io/argoproj/argocd:v3.5.5
+docker image save --platform linux/amd64 -o .tools/argocd.tar quay.io/argoproj/argocd:v3.5.5
+.\.tools\kind.exe load image-archive .tools/argocd.tar --name devsecops-demo
+```
+
+For Kyverno when this computer cannot download GitHub registry blobs, run the manual **Prepare local cluster images** workflow in GitHub Actions. Download its `p9-cluster-images` artifact, extract `cluster-images.tar` into `.tools/`, and run:
+
+```powershell
+.\.tools\kind.exe load image-archive .tools/cluster-images.tar --name devsecops-demo
+```
+
+The manual workflow stores the archive for one day. After loading images, rerun `scripts/Setup-Cluster.ps1`. No TLS checks are disabled.
